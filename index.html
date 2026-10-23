@@ -78,12 +78,6 @@ th{
 
 <h1><img src="./plume.png" style="width: 42px; height: 42px; margin-top: -12px; margin-bottom: -9px;" />&nbsp;Tirage au sort pour l'écriture avec contraintes</h1>
 
-<p>
-<input type="file" id="excelFile" accept=".xlsx,.xls">
-</p>
-
-<button id="btnCharger">Charger le fichier</button>
-
 <button id="btnTirer" disabled>
 Effectuer le tirage
 </button>
@@ -105,25 +99,26 @@ document
     .getElementById("btnTirer")
     .addEventListener("click", effectuerTirages);
 
-function chargerExcel(){
+async function chargerExcel(){
 
-    const fichier =
-        document.getElementById("excelFile");
+    const url =
+        "https://raw.github.com/hpourageaud/tirage_ecriture_contraintes/blob/main/tableau_contraintes.xlsx";
 
-    if(!fichier.files.length){
-        alert("Sélectionnez un fichier Excel.");
-        return;
-    }
+    try{
 
-    const reader = new FileReader();
+        const response = await fetch(url);
 
-    reader.onload = function(e){
+        if(!response.ok){
+            throw new Error("Impossible de charger le fichier.");
+        }
 
         const data =
-            new Uint8Array(e.target.result);
+            await response.arrayBuffer();
 
         const workbook =
-            XLSX.read(data,{type:"array"});
+            XLSX.read(data,{
+                type:"array"
+            });
 
         const feuille =
             workbook.Sheets[
@@ -131,9 +126,12 @@ function chargerExcel(){
             ];
 
         const lignes =
-            XLSX.utils.sheet_to_json(feuille,{
-                header:1
-            });
+            XLSX.utils.sheet_to_json(
+                feuille,
+                {
+                    header:1
+                }
+            );
 
         entetes = lignes[0];
 
@@ -145,13 +143,16 @@ function chargerExcel(){
 
             for(let l=1;l<lignes.length;l++){
 
+                const valeur =
+                    lignes[l][c];
+
                 if(
-                    lignes[l][c] !== undefined &&
-                    lignes[l][c] !== null &&
-                    lignes[l][c] !== ""
+                    valeur !== undefined &&
+                    valeur !== null &&
+                    valeur !== ""
                 ){
                     colonnes[c].push(
-                        lignes[l][c].toString()
+                        valeur.toString()
                     );
                 }
             }
@@ -164,11 +165,16 @@ function chargerExcel(){
             .disabled = false;
 
         alert("Données chargées.");
-    };
 
-    reader.readAsArrayBuffer(
-        fichier.files[0]
-    );
+    }
+    catch(erreur){
+
+        console.error(erreur);
+
+        alert(
+            "Erreur lors du chargement du fichier."
+        );
+    }
 }
 
 function afficherApercu(data){
