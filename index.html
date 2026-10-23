@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Tirage au sort pour l'écriture avec contraintes</title>
+
+<script src="xlsx.full.min.js"></script>
+
+<style>
+
+body{
+    font-family: Arial, sans-serif;
+    max-width: 1000px;
+    margin: 40px auto;
+    padding: 0px;
+}
+
+h1{
+    color:#006166;
+}
+
+button{
+    padding: 12px 20px;
+    margin: 5px;
+    font-size: 16px;
+	font-weight: bold;
+    cursor: pointer;
+    border: none;
+    border-radius: 5px;
+    background-color: #006166;
+    color: white;
+}
+
+button:hover{
+    background-color: #ff3366;
+}
+
+button:disabled{
+    background-color: #999;
+    cursor: not-allowed;
+}
+
+#resultats{
+    margin-top:20px;
+}
+
+.resultat{
+    background:#f3f3f3;
+    border-left:5px solid #ff3366;
+    padding:15px;
+    margin-bottom:10px;
+    font-size:20px;
+}
+
+table{
+    border-collapse:collapse;
+    margin-top:20px;
+    width:100%;
+}
+
+th,td{
+    border:1px solid #ccc;
+    padding:8px;
+}
+
+th{
+    background:#006166;
+    color:white;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1><img src="./plume.png" style="width: 42px; height: 42px; margin-top: -12px; margin-bottom: -9px;" />&nbsp;Tirage au sort pour l'écriture avec contraintes</h1>
+
+<p>
+<input type="file" id="excelFile" accept=".xlsx,.xls">
+</p>
+
+<button id="btnCharger">Charger le fichier</button>
+
+<button id="btnTirer" disabled>
+Effectuer le tirage
+</button>
+
+<div id="resultats"></div>
+
+<div id="apercu"></div>
+
+<script>
+
+let colonnes = [];
+let entetes = [];
+
+document
+    .getElementById("btnCharger")
+    .addEventListener("click", chargerExcel);
+
+document
+    .getElementById("btnTirer")
+    .addEventListener("click", effectuerTirages);
+
+function chargerExcel(){
+
+    const fichier =
+        document.getElementById("excelFile");
+
+    if(!fichier.files.length){
+        alert("Sélectionnez un fichier Excel.");
+        return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = function(e){
+
+        const data =
+            new Uint8Array(e.target.result);
+
+        const workbook =
+            XLSX.read(data,{type:"array"});
+
+        const feuille =
+            workbook.Sheets[
+                workbook.SheetNames[0]
+            ];
+
+        const lignes =
+            XLSX.utils.sheet_to_json(feuille,{
+                header:1
+            });
+
+        entetes = lignes[0];
+
+        colonnes = [];
+
+        for(let c=0;c<5;c++){
+
+            colonnes[c] = [];
+
+            for(let l=1;l<lignes.length;l++){
+
+                if(
+                    lignes[l][c] !== undefined &&
+                    lignes[l][c] !== null &&
+                    lignes[l][c] !== ""
+                ){
+                    colonnes[c].push(
+                        lignes[l][c].toString()
+                    );
+                }
+            }
+        }
+
+        afficherApercu(lignes);
+
+        document
+            .getElementById("btnTirer")
+            .disabled = false;
+
+        alert("Données chargées.");
+    };
+
+    reader.readAsArrayBuffer(
+        fichier.files[0]
+    );
+}
+
+function afficherApercu(data){
+
+    let html = "<h2>Aperçu du fichier</h2><table>";
+
+    for(let i=0;i<data.length;i++){
+
+        html += "<tr>";
+
+        for(let j=0;j<5;j++){
+
+            const valeur =
+                data[i][j] || "";
+
+            if(i===0){
+                html += "<th>"+valeur+"</th>";
+            }
+            else{
+                html += "<td>"+valeur+"</td>";
+            }
+
+        }
+
+        html += "</tr>";
+    }
+
+    html += "</table>";
+
+    document
+        .getElementById("apercu")
+        .innerHTML = html;
+}
+
+function effectuerTirages(){
+
+    let html = "<h2>Résultats</h2>";
+
+    for(let i=0;i<5;i++){
+
+        const titre =
+            entetes[i] || `Colonne ${i+1}`;
+
+        if(colonnes[i].length === 0){
+
+            html +=
+            `<div class="resultat">
+                ${titre} : aucune donnée
+            </div>`;
+
+            continue;
+        }
+
+        const index =
+            Math.floor(
+                Math.random() *
+                colonnes[i].length
+            );
+
+        const gagnant =
+            colonnes[i][index];
+
+        html +=
+        `<div class="resultat">
+            <span style="font-size: 1.5em;">🎲</span> ${titre} :
+            <strong>${gagnant}</strong>
+        </div>`;
+    }
+
+    document
+        .getElementById("resultats")
+        .innerHTML = html;
+}
+
+</script>
+
+</body>
+</html>
