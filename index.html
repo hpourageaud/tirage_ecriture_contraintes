@@ -21,6 +21,10 @@ h1{
     color:#006166;
 }
 
+h2{
+	color:#ff3366;
+}
+
 button{
     padding: 12px 20px;
     margin: 5px;
@@ -89,7 +93,7 @@ Chargement des données...
 </div>
 
 <button id="btnTirer" disabled>
-Effectuer les 5 tirages
+Effectuer le tirage
 </button>
 
 <div id="resultats"></div>
@@ -203,7 +207,7 @@ async function chargerExcel(){
 function afficherApercu(data){
 
     let html =
-        "<h2>Aperçu du fichier</h2><table>";
+        "<h2>Le tableau des contraintes</h2><table>";
 
     for(let i=0;i<data.length;i++){
 
@@ -244,7 +248,7 @@ function afficherApercu(data){
 function effectuerTirages(){
 
     let html =
-        "<h2>Résultats</h2>";
+        "<h2>Les contraintes à respecter</h2>";
 
     for(let i=0;i<5;i++){
 
