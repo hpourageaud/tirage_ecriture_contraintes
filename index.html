@@ -4,9 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Tirage au sort pour l'écriture avec contraintes</title>
+<title>5 Tirages au sort depuis Excel</title>
 
-<script src="xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
 <style>
 
@@ -14,32 +14,24 @@ body{
     font-family: Arial, sans-serif;
     max-width: 1000px;
     margin: 40px auto;
-    padding: 0px;
+    padding: 20px;
 }
 
 h1{
-    color:#006166;
+    color:#003366;
 }
 
 button{
-    padding: 12px 20px;
-    margin: 5px;
-    font-size: 16px;
-	font-weight: bold;
-    cursor: pointer;
-    border: none;
-    border-radius: 5px;
-    background-color: #006166;
-    color: white;
+    padding:10px 20px;
+    margin:10px 5px;
+    cursor:pointer;
+    font-size:16px;
 }
 
-button:hover{
-    background-color: #ff3366;
-}
-
-button:disabled{
-    background-color: #999;
-    cursor: not-allowed;
+#statut{
+    margin:15px 0;
+    color:#006400;
+    font-weight:bold;
 }
 
 #resultats{
@@ -48,7 +40,7 @@ button:disabled{
 
 .resultat{
     background:#f3f3f3;
-    border-left:5px solid #ff3366;
+    border-left:5px solid #0078d7;
     padding:15px;
     margin-bottom:10px;
     font-size:20px;
@@ -66,7 +58,7 @@ th,td{
 }
 
 th{
-    background:#006166;
+    background:#0078d7;
     color:white;
 }
 
@@ -76,10 +68,14 @@ th{
 
 <body>
 
-<h1><img src="./plume.png" style="width: 42px; height: 42px; margin-top: -12px; margin-bottom: -9px;" />&nbsp;Tirage au sort pour l'écriture avec contraintes</h1>
+<h1>5 tirages au sort depuis Excel</h1>
+
+<div id="statut">
+Chargement des données...
+</div>
 
 <button id="btnTirer" disabled>
-Effectuer le tirage
+Effectuer les 5 tirages
 </button>
 
 <div id="resultats"></div>
@@ -88,41 +84,46 @@ Effectuer le tirage
 
 <script>
 
+let colonnes = [];
+let entetes = [];
+
 window.onload = function(){
     chargerExcel();
 };
 
-let colonnes = [];
-let entetes = [];
-
-document
-    .getElementById("btnCharger")
-    .addEventListener("click", chargerExcel);
-
 document
     .getElementById("btnTirer")
-    .addEventListener("click", effectuerTirages);
+    .addEventListener(
+        "click",
+        effectuerTirages
+    );
 
 async function chargerExcel(){
 
-    const url =
-        "https://raw.github.com/hpourageaud/tirage_ecriture_contraintes/blob/main/tableau_contraintes.xlsx";
-
     try{
 
-        const response = await fetch(url);
+        // URL DU FICHIER EXCEL
+        const url = "https://github.com/hpourageaud/tirage_ecriture_contraintes/blob/main/tableau_contraintes.xlsx";
+
+        const response =
+            await fetch(url);
 
         if(!response.ok){
-            throw new Error("Impossible de charger le fichier.");
+            throw new Error(
+                "Fichier introuvable"
+            );
         }
 
         const data =
             await response.arrayBuffer();
 
         const workbook =
-            XLSX.read(data,{
-                type:"array"
-            });
+            XLSX.read(
+                data,
+                {
+                    type:"array"
+                }
+            );
 
         const feuille =
             workbook.Sheets[
@@ -147,17 +148,16 @@ async function chargerExcel(){
 
             for(let l=1;l<lignes.length;l++){
 
-                const valeur =
-                    lignes[l][c];
-
                 if(
-                    valeur !== undefined &&
-                    valeur !== null &&
-                    valeur !== ""
+                    lignes[l][c] !== undefined &&
+                    lignes[l][c] !== null &&
+                    lignes[l][c] !== ""
                 ){
+
                     colonnes[c].push(
-                        valeur.toString()
+                        lignes[l][c].toString()
                     );
+
                 }
             }
         }
@@ -168,22 +168,28 @@ async function chargerExcel(){
             .getElementById("btnTirer")
             .disabled = false;
 
-        alert("Données chargées.");
+        document
+            .getElementById("statut")
+            .innerHTML =
+            "✅ Données chargées avec succès";
 
     }
     catch(erreur){
 
         console.error(erreur);
 
-        alert(
-            "Erreur lors du chargement du fichier."
-        );
+        document
+            .getElementById("statut")
+            .innerHTML =
+            "❌ Erreur lors du chargement du fichier Excel";
+
     }
 }
 
 function afficherApercu(data){
 
-    let html = "<h2>Aperçu du fichier</h2><table>";
+    let html =
+        "<h2>Aperçu du fichier</h2><table>";
 
     for(let i=0;i<data.length;i++){
 
@@ -195,12 +201,20 @@ function afficherApercu(data){
                 data[i][j] || "";
 
             if(i===0){
-                html += "<th>"+valeur+"</th>";
-            }
-            else{
-                html += "<td>"+valeur+"</td>";
-            }
 
+                html +=
+                    "<th>" +
+                    valeur +
+                    "</th>";
+
+            }else{
+
+                html +=
+                    "<td>" +
+                    valeur +
+                    "</td>";
+
+            }
         }
 
         html += "</tr>";
@@ -215,12 +229,14 @@ function afficherApercu(data){
 
 function effectuerTirages(){
 
-    let html = "<h2>Résultats</h2>";
+    let html =
+        "<h2>Résultats</h2>";
 
     for(let i=0;i<5;i++){
 
         const titre =
-            entetes[i] || `Colonne ${i+1}`;
+            entetes[i] ||
+            `Colonne ${i+1}`;
 
         if(colonnes[i].length === 0){
 
@@ -243,7 +259,7 @@ function effectuerTirages(){
 
         html +=
         `<div class="resultat">
-            <span style="font-size: 1.5em;">🎲</span> ${titre} :
+            🎉 ${titre} :
             <strong>${gagnant}</strong>
         </div>`;
     }
