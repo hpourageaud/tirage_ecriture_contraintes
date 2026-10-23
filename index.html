@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>5 Tirages au sort depuis Excel</title>
+<title>Tirage au sort pour l'écriture avec contraintes</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
@@ -14,18 +14,32 @@ body{
     font-family: Arial, sans-serif;
     max-width: 1000px;
     margin: 40px auto;
-    padding: 20px;
+    padding: 0px;
 }
 
 h1{
-    color:#003366;
+    color:#006166;
 }
 
 button{
-    padding:10px 20px;
-    margin:10px 5px;
-    cursor:pointer;
-    font-size:16px;
+    padding: 12px 20px;
+    margin: 5px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    border: none;
+    border-radius: 5px;
+    background-color: #006166;
+    color: white;
+}
+
+button:hover{
+    background-color: #ff3366;
+}
+
+button:disabled{
+    background-color: #999;
+    cursor: not-allowed;
 }
 
 #statut{
@@ -58,7 +72,7 @@ th,td{
 }
 
 th{
-    background:#0078d7;
+    background:#006166;
     color:white;
 }
 
@@ -68,7 +82,7 @@ th{
 
 <body>
 
-<h1>5 tirages au sort depuis Excel</h1>
+<h1><img src="./plume.png" style="width: 42px; height: 42px; margin-top: -12px; margin-bottom: -9px;" />&nbsp;Tirage au sort pour l'écriture avec contraintes</h1>
 
 <div id="statut">
 Chargement des données...
@@ -259,7 +273,7 @@ function effectuerTirages(){
 
         html +=
         `<div class="resultat">
-            🎉 ${titre} :
+            <span style="font-size: 1.5em;">🎲</span> ${titre} :
             <strong>${gagnant}</strong>
         </div>`;
     }
